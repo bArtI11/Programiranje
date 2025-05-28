@@ -1,4 +1,4 @@
-#include "main.h"
+#include "HEADER.h"
 
 int main() {
     Proizvod *proizvodi = NULL;
