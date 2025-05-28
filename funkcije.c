@@ -1,104 +1,119 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
-#include "header.h"
+#include "HEADER.H"
 
-Proizvod unesiProizvod() {
-	Proizvod p;
+void dodajProizvod(Proizvod **proizvodi, int *brojProizvoda) {
+    *proizvodi = realloc(*proizvodi, (*brojProizvoda + 1) * sizeof(Proizvod));
+    printf("Naziv: ");
+    scanf(" %49[^\n]", (*proizvodi)[*brojProizvoda].naziv);
+    
+    int tip;
+    do {
+        printf("Vrsta (1 - Slatko, 2 - Slano): ");
+        scanf("%d", &tip);
+    } while (tip < 1 || tip > 2);
+    (*proizvodi)[*brojProizvoda].vrsta = tip;
 
-	printf("Unesite naziv proizvoda: ");
-	scanf(" %[^\n]", p.naziv);
-
-	do {
-		printf("Vrsta (1 - Slatko, 2 - Slano): ");
-		scanf("%d", (int*)&p.vrsta);
-	} while (p.vrsta != SLATKO && p.vrsta != SLANO);
-
-	printf("Unesite datum proizvodnje (dan mjesec godina): ");
-	scanf("%d %d %d", &p.datumProizvodnje.dan, &p.datumProizvodnje.mjesec, &p.datumProizvodnje.godina);
-
-	printf("Kolicina proizvedena: ");
-	scanf("%d", &p.proizvedeno);
-
-	printf("Kolicina ostala za bacanje: ");
-	scanf("%d", &p.ostaloZaBacanje);
-
-	return p;
+    printf("Kolicina: ");
+    scanf("%d", &(*proizvodi)[*brojProizvoda].kolicina);
+    printf("Cijena: ");
+    scanf("%f", &(*proizvodi)[*brojProizvoda].cijena);
+    printf("Datum (dd mm yyyy): ");
+    scanf("%d %d %d", &(*proizvodi)[*brojProizvoda].datumProizvodnje.dan,
+          &(*proizvodi)[*brojProizvoda].datumProizvodnje.mjesec,
+          &(*proizvodi)[*brojProizvoda].datumProizvodnje.godina);
+    (*brojProizvoda)++;
 }
 
-Datum unesiDatum() {
-	Datum d;
-	printf("\nUnesite datum za provjeru (dan.mjesec.godina): ");
-	scanf("%d %d %d", &d.dan, &d.mjesec, &d.godina);
-	return d;
+void ispisiProizvode(Proizvod *proizvodi, int brojProizvoda) {
+    for (int i = 0; i < brojProizvoda; i++) {
+        printf("%s | %s | %d | %.2f | %02d.%02d.%d\n",
+               proizvodi[i].naziv,
+               proizvodi[i].vrsta == SLATKO ? "Slatko" : "Slano",
+               proizvodi[i].kolicina,
+               proizvodi[i].cijena,
+               proizvodi[i].datumProizvodnje.dan,
+               proizvodi[i].datumProizvodnje.mjesec,
+               proizvodi[i].datumProizvodnje.godina);
+    }
 }
 
-int ukupnoZaDatum(Proizvod* niz, int n, Datum datum) {
-	int suma = 0;
-	for (int i = 0; i < n; i++) {
-		if (niz[i].datumProizvodnje.dan == datum.dan &&
-			niz[i].datumProizvodnje.mjesec == datum.mjesec &&
-			niz[i].datumProizvodnje.godina == datum.godina) {
-			suma += niz[i].proizvedeno;
-		}
-	}
-	return suma;
+void spremiUDatoteku(Proizvod *proizvodi, int brojProizvoda) {
+    FILE *fp = fopen("proizvodi.txt", "w");
+    for (int i = 0; i < brojProizvoda; i++) {
+        fprintf(fp, "%s %d %d %.2f %d %d %d\n",
+                proizvodi[i].naziv,
+                proizvodi[i].vrsta,
+                proizvodi[i].kolicina,
+                proizvodi[i].cijena,
+                proizvodi[i].datumProizvodnje.dan,
+                proizvodi[i].datumProizvodnje.mjesec,
+                proizvodi[i].datumProizvodnje.godina);
+    }
+    fclose(fp);
 }
 
-void ispisiProizvode(Proizvod* niz, int n) {
-	for (int i = 0; i < n; i++) {
-		printf("%s | %s | %02d.%02d.%d | Proizvedeno: %d | Ostalo: %d\n",
-			niz[i].naziv,
-			niz[i].vrsta == SLATKO ? "Slatko" : "Slano",
-			niz[i].datumProizvodnje.dan,
-			niz[i].datumProizvodnje.mjesec,
-			niz[i].datumProizvodnje.godina,
-			niz[i].proizvedeno,
-			niz[i].ostaloZaBacanje);
-	}
+void ucitajIzDatoteke(Proizvod **proizvodi, int *brojProizvoda) {
+    FILE *fp = fopen("proizvodi.txt", "r");
+    if (!fp) return;
+    Proizvod temp;
+    while (fscanf(fp, " %49s %d %d %f %d %d %d", temp.naziv, (int*)&temp.vrsta,
+                  &temp.kolicina, &temp.cijena,
+                  &temp.datumProizvodnje.dan, &temp.datumProizvodnje.mjesec,
+                  &temp.datumProizvodnje.godina) == 7) {
+        *proizvodi = realloc(*proizvodi, (*brojProizvoda + 1) * sizeof(Proizvod));
+        (*proizvodi)[*brojProizvoda] = temp;
+        (*brojProizvoda)++;
+    }
+    fclose(fp);
 }
 
-int usporediPoDatumu(const void* a, const void* b) {
-	const Proizvod* p1 = (const Proizvod*)a;
-	const Proizvod* p2 = (const Proizvod*)b;
-
-	if (p1->datumProizvodnje.godina != p2->datumProizvodnje.godina)
-		return p1->datumProizvodnje.godina - p2->datumProizvodnje.godina;
-	if (p1->datumProizvodnje.mjesec != p2->datumProizvodnje.mjesec)
-		return p1->datumProizvodnje.mjesec - p2->datumProizvodnje.mjesec;
-	return p1->datumProizvodnje.dan - p2->datumProizvodnje.dan;
+void obrisiProizvod(Proizvod *proizvodi, int *brojProizvoda) {
+    char naziv[MAX_NAZIV];
+    printf("Unesite naziv za brisanje: ");
+    scanf(" %49[^\n]", naziv);
+    for (int i = 0; i < *brojProizvoda; i++) {
+        if (strcmp(proizvodi[i].naziv, naziv) == 0) {
+            for (int j = i; j < *brojProizvoda - 1; j++)
+                proizvodi[j] = proizvodi[j + 1];
+            (*brojProizvoda)--;
+            printf("Obrisano.\n");
+            return;
+        }
+    }
+    printf("Nije pronadjen.\n");
 }
 
-int usporediPoNazivu(const void* a, const void* b) {
-	const Proizvod* p1 = (const Proizvod*)a;
-	const Proizvod* p2 = (const Proizvod*)b;
-	return strcmp(p1->naziv, p2->naziv);
+void azurirajProizvod(Proizvod *proizvodi, int brojProizvoda) {
+    char naziv[MAX_NAZIV];
+    printf("Unesite naziv za ažuriranje: ");
+    scanf(" %49[^\n]", naziv);
+    for (int i = 0; i < brojProizvoda; i++) {
+        if (strcmp(proizvodi[i].naziv, naziv) == 0) {
+            printf("Nova kolicina: ");
+            scanf("%d", &proizvodi[i].kolicina);
+            printf("Nova cijena: ");
+            scanf("%f", &proizvodi[i].cijena);
+            return;
+        }
+    }
+    printf("Nije pronadjen.\n");
 }
 
-void spremiUDatoteku(Proizvod* niz, int n, const char* ime) {
-	FILE* f = fopen(ime, "wb");
-	if (!f)
-	{
-		printf("Greska pri otvaranju datotek!\n");
-		return;
-	}
-	fwrite(&n, sizeof(int), 1, f); // spremi broj u elemenata
-	fwrite(niz, sizeof(Proizvod), n, f);
-	fclose(f);
-	printf("Podaci uspjesno spremljeni u '%s'. \n", ime);
+int compareNaziv(const void *a, const void *b) {
+    return strcmp(((Proizvod *)a)->naziv, ((Proizvod *)b)->naziv);
 }
 
-int ucitajIzDatoteke(Proizvod* niz, const char* ime) {
-	FILE* f = fopen(ime, "rb");
-	if (!f)
-	{
-		printf("Datoteka '%s' ne postoji.\n", ime);
-		return 0;
-	}
-	int n;
-	fread(&n, sizeof(int), 1, f); //broj proizvoda
-	fread(niz, sizeof(Proizvod), n, f);
-	fclose(f);
-	printf("Ucitano %d proizvoda iz '%s'.\n", n, ime);
-	return n;
+int compareDatum(const void *a, const void *b) {
+    Datum d1 = ((Proizvod *)a)->datumProizvodnje;
+    Datum d2 = ((Proizvod *)b)->datumProizvodnje;
+    if (d1.godina != d2.godina) return d1.godina - d2.godina;
+    if (d1.mjesec != d2.mjesec) return d1.mjesec - d2.mjesec;
+    return d1.dan - d2.dan;
+}
+
+void sortirajPoNazivu(Proizvod *proizvodi, int brojProizvoda) {
+    qsort(proizvodi, brojProizvoda, sizeof(Proizvod), compareNaziv);
+}
+
+void sortirajPoDatumu(Proizvod *proizvodi, int brojProizvoda) {
+    qsort(proizvodi, brojProizvoda, sizeof(Proizvod), compareDatum);
 }
