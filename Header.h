@@ -1,33 +1,38 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#define MAX_NAZIV 100
+#define MAX_DATUM 11
 
-#define MAX_NAZIV 50
-
-typedef enum { SLATKO = 1, SLANO } Vrsta;
-
-typedef struct {
-    int dan, mjesec, godina;
-} Datum;
-
-typedef struct {
+// Struktura proizvoda
+typedef struct Proizvod {
     char naziv[MAX_NAZIV];
-    Vrsta vrsta;
-    int kolicina;
-    float cijena;
-    Datum datumProizvodnje;
+    char vrsta[10]; // "slatko" ili "slano"
+    char datum[MAX_DATUM]; // "dd.mm.yyyy"
+    int proizvedeno;
+    int prodano;
+    struct Proizvod* sljedeci;
 } Proizvod;
 
-void dodajProizvod(Proizvod **proizvodi, int *brojProizvoda);
-void ispisiProizvode(Proizvod *proizvodi, int brojProizvoda);
-void spremiUDatoteku(Proizvod *proizvodi, int brojProizvoda);
-void ucitajIzDatoteke(Proizvod **proizvodi, int *brojProizvoda);
-void obrisiProizvod(Proizvod *proizvodi, int *brojProizvoda);
-void azurirajProizvod(Proizvod *proizvodi, int brojProizvoda);
-void sortirajPoNazivu(Proizvod *proizvodi, int brojProizvoda);
-void sortirajPoDatumu(Proizvod *proizvodi, int brojProizvoda);
+// Funkcije
+typedef struct {
+    Proizvod* pocetak;
+} Lista;
+
+void inicijalizirajListu();
+void dodajProizvod();
+void ispisiProizvode();
+void azurirajProizvod();
+void obrisiProizvod();
+void spremiUDatoteku();
+void ucitajIzDatoteke();
+void sortirajPoNazivu();
+void sortirajPoDatumu();
+void pretraziPoNazivu();
+void filtrirajPoDatumu();
+void statistikaKolicina();
+void prikaziIzbornik();
+void oslobodiMemoriju();
+void prikaziOstatkeNaDan();
 
 #endif
