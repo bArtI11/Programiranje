@@ -1,26 +1,33 @@
 #include "HEADER.h"
 
-int main() {
-    Proizvod *proizvodi = NULL;
-    int brojProizvoda = 0;
-    int izbor;
+#include <stdio.h>
 
-    ucitajIzDatoteke(&proizvodi, &brojProizvoda);
+
+int main() {
+    int izbor;
+    inicijalizirajListu();
+    ucitajIzDatoteke();
 
     do {
-        printf("\n1. Dodaj\n2. Ispisi\n3. Spremi\n4. Obrisi\n5. Azuriraj\n6. Sortiraj po nazivu\n7. Sortiraj po datumu\n0. Izlaz\nIzbor: ");
+        prikaziIzbornik();
+        printf("Unesi izbor: ");
         scanf("%d", &izbor);
-        switch (izbor) {
-            case 1: dodajProizvod(&proizvodi, &brojProizvoda); break;
-            case 2: ispisiProizvode(proizvodi, brojProizvoda); break;
-            case 3: spremiUDatoteku(proizvodi, brojProizvoda); break;
-            case 4: obrisiProizvod(proizvodi, &brojProizvoda); break;
-            case 5: azurirajProizvod(proizvodi, brojProizvoda); break;
-            case 6: sortirajPoNazivu(proizvodi, brojProizvoda); break;
-            case 7: sortirajPoDatumu(proizvodi, brojProizvoda); break;
-        }
-    } while (izbor != 0);
 
-    free(proizvodi);
+        switch (izbor) {
+            case 1: dodajProizvod(); break;
+            case 2: ispisiProizvode(); break;
+            case 3: azurirajProizvod(); break;
+            case 4: obrisiProizvod(); break;
+            case 5: spremiUDatoteku(); break;
+            case 6: sortirajPoNazivu(); break;
+            case 7: pretraziPoNazivu(); break;
+            case 8: statistikaKolicina(); break;
+            case 9: printf("Izlaz iz programa.\n"); break;
+            default: printf("Pogresan izbor!\n"); break;
+        }
+
+    } while (izbor != 9);
+
+    oslobodiMemoriju();
     return 0;
 }
