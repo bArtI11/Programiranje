@@ -1,213 +1,251 @@
-#include "HEADER.H"
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "proizvod.h"
 
-
-Proizvod lista[MAX];
-int brojProizvoda = 0;
+static Proizvod* glava = NULL;
 
 void inicijalizirajListu() {
-    brojProizvoda = 0;
+    glava = NULL;
 }
 
-void ucitajIzDatoteke() {
-    FILE *fp = fopen("baza.txt", "r");
-    if (fp == NULL) return;
-
-    while (fscanf(fp, "%49[^,],%f,%d,%d,%d,%d,%d\n",
-                  lista[brojProizvoda].naziv,
-                  &lista[brojProizvoda].cijena,
-                  &lista[brojProizvoda].kolicina,
-                  (int *)&lista[brojProizvoda].vrsta,
-                  &lista[brojProizvoda].datumUnosa.dan,
-                  &lista[brojProizvoda].datumUnosa.mjesec,
-                  &lista[brojProizvoda].datumUnosa.godina) == 7) {
-        brojProizvoda++;
+Proizvod* kreirajProizvod() {
+    Proizvod* novi = (Proizvod*)malloc(sizeof(Proizvod));
+    if (!novi) {
+        perror("Greska pri alokaciji memorije");
+        exit(1);
     }
 
-    fclose(fp);
-}
+    printf("Unesi naziv proizvoda: ");
+    scanf("%s", novi->naziv);
 
-void spremiUDatoteku() {
-    FILE *fp = fopen("baza.txt", "w");
-    if (fp == NULL) return;
+    do {
+        printf("Vrsta (1 - Slatko, 2 - Slano): ");
+        scanf("%d", (int*)&novi->vrsta);
+    } while (novi->vrsta != SLATKO && novi->vrsta != SLANO);
 
-    for (int i = 0; i < brojProizvoda; i++) {
-        fprintf(fp, "%s,%.2f,%d,%d,%d,%d,%d\n",
-                lista[i].naziv,
-                lista[i].cijena,
-                lista[i].kolicina,
-                lista[i].vrsta,
-                lista[i].datumUnosa.dan,
-                lista[i].datumUnosa.mjesec,
-                lista[i].datumUnosa.godina);
-    }
+    printf("Unesi kolicinu proizvedenu: ");
+    scanf("%d", &novi->proizvedeno);
+    printf("Unesi kolicinu prodanu: ");
+    scanf("%d", &novi->prodano);
+    printf("Unesi datum (dd mm yyyy): ");
+    scanf("%d %d %d", &novi->datum.dan, &novi->datum.mjesec, &novi->datum.godina);
 
-    fclose(fp);
-}
-
-void oslobodiMemoriju() {
-    // Nema dinamičke memorije u ovom primjeru
+    novi->sljedeci = NULL;
+    return novi;
 }
 
 void dodajProizvod() {
-    if (brojProizvoda >= MAX) {
-        printf("Dostignut maksimalan broj proizvoda!\n");
-        return;
-    }
-
-    printf("Unesi naziv: ");
-    scanf(" %[\n^]", lista[brojProizvoda].naziv);
-    printf("Unesi cijenu: ");
-    scanf("%f", &lista[brojProizvoda].cijena);
-    printf("Unesi kolicinu: ");
-    scanf("%d", &lista[brojProizvoda].kolicina);
-
-    do {
-        printf("Unesi vrstu (1 - slatko, 2 - slano): ");
-        scanf("%d", (int *)&lista[brojProizvoda].vrsta);
-    } while (lista[brojProizvoda].vrsta != SLATKO && lista[brojProizvoda].vrsta != SLANO);
-
-    printf("Unesi datum (dd mm yyyy): ");
-    scanf("%d %d %d", &lista[brojProizvoda].datumUnosa.dan,
-          &lista[brojProizvoda].datumUnosa.mjesec,
-          &lista[brojProizvoda].datumUnosa.godina);
-
-    brojProizvoda++;
-    printf("Proizvod dodan.\n");
+    Proizvod* novi = kreirajProizvod();
+    novi->sljedeci = glava;
+    glava = novi;
 }
 
 void ispisiProizvode() {
-    for (int i = 0; i < brojProizvoda; i++) {
-        printf("%d. %s | %.2f EUR | Kolicina: %d | %s | Datum: %02d.%02d.%04d\n",
-               i + 1,
-               lista[i].naziv,
-               lista[i].cijena,
-               lista[i].kolicina,
-               lista[i].vrsta == SLATKO ? "Slatko" : "Slano",
-               lista[i].datumUnosa.dan,
-               lista[i].datumUnosa.mjesec,
-               lista[i].datumUnosa.godina);
+    Proizvod* temp = glava;
+    while (temp) {
+        printf("%s | %s | Proizvedeno: %d | Prodano: %d | Datum: %02d.%02d.%04d\n",
+            temp->naziv,
+            temp->vrsta == SLATKO ? "Slatko" : "Slano",
+            temp->proizvedeno,
+            temp->prodano,
+            temp->datum.dan, temp->datum.mjesec, temp->datum.godina);
+        temp = temp->sljedeci;
     }
 }
 
 void azurirajProizvod() {
-    int index;
-    printf("Unesi redni broj proizvoda za azuriranje: ");
-    scanf("%d", &index);
-    if (index < 1 || index > brojProizvoda) {
-        printf("Neispravan broj.\n");
-        return;
+    char naziv[MAX_NAZIV];
+    printf("Unesi naziv proizvoda za azuriranje: ");
+    scanf("%s", naziv);
+    Proizvod* temp = glava;
+    while (temp) {
+        if (strcmp(temp->naziv, naziv) == 0) {
+            printf("Unesi novu kolicinu proizvedenu: ");
+            scanf("%d", &temp->proizvedeno);
+            printf("Unesi novu kolicinu prodanu: ");
+            scanf("%d", &temp->prodano);
+            return;
+        }
+        temp = temp->sljedeci;
     }
-    index--;
-
-    printf("Novi naziv: ");
-    scanf(" %[\n^]", lista[index].naziv);
-    printf("Nova cijena: ");
-    scanf("%f", &lista[index].cijena);
-    printf("Nova kolicina: ");
-    scanf("%d", &lista[index].kolicina);
+    printf("Proizvod nije pronadjen.\n");
 }
 
 void obrisiProizvod() {
-    int index;
-    printf("Unesi redni broj proizvoda za brisanje: ");
-    scanf("%d", &index);
-    if (index < 1 || index > brojProizvoda) {
-        printf("Neispravan broj.\n");
+    char naziv[MAX_NAZIV];
+    printf("Unesi naziv proizvoda za brisanje: ");
+    scanf("%s", naziv);
+    Proizvod* temp = glava, * prethodni = NULL;
+
+    while (temp) {
+        if (strcmp(temp->naziv, naziv) == 0) {
+            if (prethodni) {
+                prethodni->sljedeci = temp->sljedeci;
+            }
+            else {
+                glava = temp->sljedeci;
+            }
+            free(temp);
+            printf("Proizvod obrisan.\n");
+            return;
+        }
+        prethodni = temp;
+        temp = temp->sljedeci;
+    }
+    printf("Proizvod nije pronadjen.\n");
+}
+
+void spremiUDatoteku() {
+    FILE* f = fopen("baza.bin", "wb");
+    if (!f) {
+        perror("Ne mogu otvoriti datoteku");
         return;
     }
-    index--;
-
-    for (int i = index; i < brojProizvoda - 1; i++) {
-        lista[i] = lista[i + 1];
+    Proizvod* temp = glava;
+    while (temp) {
+        fwrite(temp, sizeof(Proizvod) - sizeof(Proizvod*), 1, f);
+        temp = temp->sljedeci;
     }
-    brojProizvoda--;
-    printf("Proizvod obrisan.\n");
+    fclose(f);
+    printf("Podaci spremljeni.\n");
+}
+
+void ucitajIzDatoteke() {
+    FILE* f = fopen("baza.bin", "rb");
+    if (!f) return;
+
+    oslobodiMemoriju();
+    Proizvod temp;
+    while (fread(&temp, sizeof(Proizvod) - sizeof(Proizvod*), 1, f)) {
+        Proizvod* novi = (Proizvod*)malloc(sizeof(Proizvod));
+        *novi = temp;
+        novi->sljedeci = glava;
+        glava = novi;
+    }
+    fclose(f);
+}
+
+int usporediDatume(Datum d1, Datum d2) {
+    if (d1.godina != d2.godina)
+        return d1.godina - d2.godina;
+    if (d1.mjesec != d2.mjesec)
+        return d1.mjesec - d2.mjesec;
+    return d1.dan - d2.dan;
 }
 
 void sortirajPoNazivu() {
-    for (int i = 0; i < brojProizvoda - 1; i++) {
-        for (int j = i + 1; j < brojProizvoda; j++) {
-            if (strcmp(lista[i].naziv, lista[j].naziv) > 0) {
-                Proizvod temp = lista[i];
-                lista[i] = lista[j];
-                lista[j] = temp;
+    if (!glava || !glava->sljedeci) return;
+    for (Proizvod* i = glava; i; i = i->sljedeci) {
+        for (Proizvod* j = i->sljedeci; j; j = j->sljedeci) {
+            if (strcmp(i->naziv, j->naziv) > 0) {
+                Proizvod temp = *i;
+                *i = *j;
+                *j = temp;
+                Proizvod* swap = i->sljedeci;
+                i->sljedeci = j->sljedeci;
+                j->sljedeci = swap;
             }
         }
     }
-    printf("Sortirano po nazivu.\n");
 }
 
 void sortirajPoDatumu() {
-    for (int i = 0; i < brojProizvoda - 1; i++) {
-        for (int j = i + 1; j < brojProizvoda; j++) {
-            Datum d1 = lista[i].datumUnosa;
-            Datum d2 = lista[j].datumUnosa;
-            if (d1.godina > d2.godina ||
-                (d1.godina == d2.godina && d1.mjesec > d2.mjesec) ||
-                (d1.godina == d2.godina && d1.mjesec == d2.mjesec && d1.dan > d2.dan)) {
-                Proizvod temp = lista[i];
-                lista[i] = lista[j];
-                lista[j] = temp;
+    if (!glava || !glava->sljedeci) return;
+    for (Proizvod* i = glava; i; i = i->sljedeci) {
+        for (Proizvod* j = i->sljedeci; j; j = j->sljedeci) {
+            if (usporediDatume(i->datum, j->datum) > 0) {
+                Proizvod temp = *i;
+                *i = *j;
+                *j = temp;
+                Proizvod* swap = i->sljedeci;
+                i->sljedeci = j->sljedeci;
+                j->sljedeci = swap;
             }
         }
     }
-    printf("Sortirano po datumu.\n");
 }
 
 void pretraziPoNazivu() {
-    char trazeni[50];
+    char trazeni[MAX_NAZIV];
     printf("Unesi naziv za pretragu: ");
-    scanf(" %[\n^]", trazeni);
-
-    for (int i = 0; i < brojProizvoda; i++) {
-        if (strstr(lista[i].naziv, trazeni)) {
-            printf("%s | %.2f EUR | Kolicina: %d\n",
-                   lista[i].naziv, lista[i].cijena, lista[i].kolicina);
+    scanf("%s", trazeni);
+    Proizvod* temp = glava;
+    while (temp) {
+        if (strstr(temp->naziv, trazeni)) {
+            printf("%s | %s | %d/%d | %02d.%02d.%d\n", temp->naziv,
+                temp->vrsta == SLATKO ? "Slatko" : "Slano",
+                temp->proizvedeno,
+                temp->prodano,
+                temp->datum.dan,
+                temp->datum.mjesec,
+                temp->datum.godina);
         }
+        temp = temp->sljedeci;
+    }
+}
+
+void filtrirajPoDatumu() {
+    Datum d;
+    printf("Unesi datum (dd mm yyyy): ");
+    scanf("%d %d %d", &d.dan, &d.mjesec, &d.godina);
+    Proizvod* temp = glava;
+    while (temp) {
+        if (usporediDatume(temp->datum, d) == 0) {
+            printf("%s | %s | %d/%d\n", temp->naziv,
+                temp->vrsta == SLATKO ? "Slatko" : "Slano",
+                temp->proizvedeno, temp->prodano);
+        }
+        temp = temp->sljedeci;
     }
 }
 
 void statistikaKolicina() {
     int ukupno = 0;
-    for (int i = 0; i < brojProizvoda; i++) {
-        ukupno += lista[i].kolicina;
+    Proizvod* temp = glava;
+    while (temp) {
+        ukupno += temp->proizvedeno - temp->prodano;
+        temp = temp->sljedeci;
     }
-    printf("Ukupna kolicina proizvoda: %d\n", ukupno);
+    printf("Ukupna preostala kolicina: %d\n", ukupno);
 }
 
-void filtrirajPoDatumu(int dan, int mjesec, int godina) {
-    for (int i = 0; i < brojProizvoda; i++) {
-        Datum d = lista[i].datumUnosa;
-        if (d.dan == dan && d.mjesec == mjesec && d.godina == godina) {
-            printf("%s | %.2f EUR | Kolicina: %d\n",
-                   lista[i].naziv, lista[i].cijena, lista[i].kolicina);
+void prikaziOstatkeNaDan() {
+    Datum d;
+    printf("Unesi datum (dd mm yyyy): ");
+    scanf("%d %d %d", &d.dan, &d.mjesec, &d.godina);
+    Proizvod* temp = glava;
+    while (temp) {
+        if (usporediDatume(temp->datum, d) == 0 && temp->proizvedeno > temp->prodano) {
+            printf("%s | Ostalo: %d\n", temp->naziv, temp->proizvedeno - temp->prodano);
         }
-    }
-}
-
-void prikaziOstatkeNaKrajuDana(int dan, int mjesec, int godina) {
-    printf("Preostali proizvodi za %02d.%02d.%04d:\n", dan, mjesec, godina);
-    for (int i = 0; i < brojProizvoda; i++) {
-        Datum d = lista[i].datumUnosa;
-        if (d.dan == dan && d.mjesec == mjesec && d.godina == godina && lista[i].kolicina > 0) {
-            printf("%s | Kolicina: %d\n", lista[i].naziv, lista[i].kolicina);
-        }
+        temp = temp->sljedeci;
     }
 }
 
 void prikaziIzbornik() {
     printf("\n--- IZBORNIK ---\n");
-    printf("1. Dodaj novi proizvod\n");
+    printf("1. Dodaj proizvod\n");
     printf("2. Ispisi sve proizvode\n");
     printf("3. Azuriraj proizvod\n");
     printf("4. Obrisi proizvod\n");
     printf("5. Spremi u datoteku\n");
-    printf("6. Sortiraj po nazivu\n");
-    printf("7. Pretrazi po nazivu\n");
-    printf("8. Statistika kolicina\n");
-    printf("9. Izlaz\n");
+    printf("6. Ucitaj iz datoteke\n");
+    printf("7. Sortiraj po nazivu\n");
+    printf("8. Sortiraj po datumu\n");
+    printf("9. Pretrazi po nazivu\n");
+    printf("10. Filtriraj po datumu\n");
+    printf("11. Statistika kolicina\n");
+    printf("12. Ostatci na kraju dana\n");
+    printf("13. Izlaz\n");
+}
+
+void oslobodiMemoriju() {
+    while (glava) {
+        Proizvod* temp = glava;
+        glava = glava->sljedeci;
+        free(temp);
+    }
 }
