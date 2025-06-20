@@ -1,24 +1,35 @@
-#ifndef HEADER_H
-#define HEADER_H
+#define _CRT_SECURE_NO_WARNINGS
+
+#ifndef PROIZVOD_H
+#define PROIZVOD_H
 
 #define MAX_NAZIV 100
 #define MAX_DATUM 11
 
+// Struktura za pohranu datuma
+typedef struct {
+    int dan;
+    int mjesec;
+    int godina;
+} Datum;
+
+// Enum za vrstu proizvoda
+typedef enum {
+    SLATKO = 1,
+    SLANO = 2
+} VrstaProizvoda;
+
 // Struktura proizvoda
 typedef struct Proizvod {
     char naziv[MAX_NAZIV];
-    char vrsta[10]; // "slatko" ili "slano"
-    char datum[MAX_DATUM]; // "dd.mm.yyyy"
+    VrstaProizvoda vrsta;
     int proizvedeno;
     int prodano;
+    Datum datum;
     struct Proizvod* sljedeci;
 } Proizvod;
 
 // Funkcije
-typedef struct {
-    Proizvod* pocetak;
-} Lista;
-
 void inicijalizirajListu();
 void dodajProizvod();
 void ispisiProizvode();
