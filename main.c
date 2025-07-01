@@ -1,18 +1,14 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include "proizvod.h"
 
 int main() {
     int izbor;
-
     inicijalizirajListu();
     ucitajIzDatoteke();
 
     do {
         prikaziIzbornik();
-        printf("Unesi izbor: ");
-        scanf("%d", &izbor);
-
+        printf("Izbor: "); scanf("%d", &izbor);
         switch (izbor) {
             case 1: dodajProizvod(); break;
             case 2: ispisiProizvode(); break;
@@ -20,21 +16,21 @@ int main() {
             case 4: obrisiProizvod(); break;
             case 5: spremiUDatoteku(); break;
             case 6: ucitajIzDatoteke(); break;
-            case 7:
-                printf("Redni broj proizvoda: ");
-                int n; scanf("%d", &n);
-                ucitajNTiProizvod(n);
-                break;
-            case 8:
-                printf("Spremiti prije izlaza? (1=DA/0=NE): ");
-                int p; scanf("%d", &p);
-                if (p) spremiUDatoteku();
+            case 7: backupDatoteke(); break;
+            case 8: obrisiDatoteku(); break;
+            case 9: {
+                int n; printf("Koji zapis? "); scanf("%d", &n);
+                ucitajNTiProizvod(n); break;
+            }
+            case 10: prikaziPoziciju(); break;
+            case 11: rewindDatoteke(); break;
+            case 12: sortirajPoNazivu(); break;
+            case 13:
                 printf("Izlaz.\n");
                 break;
-            default: printf("Nepostojeca opcija!\n"); break;
+            default: printf("Pogresan unos.\n"); break;
         }
-
-    } while (izbor != 8);
+    } while (izbor != 13);
 
     oslobodiMemoriju();
     return 0;
