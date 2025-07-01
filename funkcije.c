@@ -214,9 +214,19 @@ void sortirajPoNazivu() {
 
 void prikaziIzbornik() {
     printf("\n--- IZBORNIK ---\n");
-    printf("1 Dodaj | 2 Ispisi | 3 Azuriraj | 4 Obrisi | 5 Spremi | 6 Ucitaj\n");
-    printf("7 Backup | 8 Obrisi bazu | 9 fseek | 10 ftell | 11 rewind\n");
-    printf("12 Sortiraj naziv | 13 Izlaz\n");
+    printf("1. Dodaj novi proizvod\n");
+    printf("2. Prikazi sve proizvode\n");
+    printf("3. Azuriraj proizvod\n");
+    printf("4. Obrisi proizvod\n");
+    printf("5. Spremi bazu u datoteku\n");
+    printf("6. Ucitaj bazu iz datoteke\n");
+    printf("7. Napravi sigurnosnu kopiju baze\n");
+    printf("8. Obrisi cijelu bazu\n");
+    printf("9. Prikazi proizvod po rednom broju\n");
+    printf("10. Pokaži veličinu baze\n");
+    printf("11. Vrati se na početak baze\n");
+    printf("12. Sortiraj proizvode po nazivu\n");
+    printf("13. Izlaz iz programa\n");
 }
 
 void oslobodiMemoriju() {
