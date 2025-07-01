@@ -2,13 +2,11 @@
 #include <stdio.h>
 #include "proizvod.h"
 
-// Glavna funkcija programa.
-// Povezuje sve CRUD operacije i dodatne opcije kroz izbornik.
 int main() {
     int izbor;
 
     inicijalizirajListu();
-    ucitajIzDatoteke(); // Na početku odmah učitaj podatke ako postoje
+    ucitajIzDatoteke();
 
     do {
         prikaziIzbornik();
@@ -16,29 +14,28 @@ int main() {
         scanf("%d", &izbor);
 
         switch (izbor) {
-        case 1: dodajProizvod(); break;   // Create
-        case 2: ispisiProizvode(); break; // Read
-        case 3: azurirajProizvod(); break;// Update
-        case 4: obrisiProizvod(); break;  // Delete
-        case 5: spremiUDatoteku(); break; // Spremanje
-        case 6: ucitajIzDatoteke(); break;// Učitavanje
-        case 7: sortirajPoNazivu(); break;
-        case 8: sortirajPoDatumu(); break;
-        case 9: pretraziPoNazivu(); break;
-        case 10: filtrirajPoDatumu(); break;
-        case 11: statistikaKolicina(); break;
-        case 12: prikaziOstatkeNaDan(); break;
-        case 13:
-            printf("Zelite li spremiti prije izlaska? (1 = DA / 0 = NE): ");
-            int potvrda; scanf("%d", &potvrda);
-            if (potvrda) spremiUDatoteku();
-            printf("Izlaz iz programa.\n");
-            break;
-        default: printf("Pogresan izbor!\n"); break;
+            case 1: dodajProizvod(); break;
+            case 2: ispisiProizvode(); break;
+            case 3: azurirajProizvod(); break;
+            case 4: obrisiProizvod(); break;
+            case 5: spremiUDatoteku(); break;
+            case 6: ucitajIzDatoteke(); break;
+            case 7:
+                printf("Redni broj proizvoda: ");
+                int n; scanf("%d", &n);
+                ucitajNTiProizvod(n);
+                break;
+            case 8:
+                printf("Spremiti prije izlaza? (1=DA/0=NE): ");
+                int p; scanf("%d", &p);
+                if (p) spremiUDatoteku();
+                printf("Izlaz.\n");
+                break;
+            default: printf("Nepostojeca opcija!\n"); break;
         }
 
-    } while (izbor != 13);
+    } while (izbor != 8);
 
-    oslobodiMemoriju(); // Oslobađa svu memoriju prije izlaska
+    oslobodiMemoriju();
     return 0;
 }
